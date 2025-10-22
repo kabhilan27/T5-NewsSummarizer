@@ -1,4 +1,4 @@
-# 📰 T5 News Summarizer (Flask)
+# T5 News Summarizer (Flask)
 
 ![Python](https://img.shields.io/badge/Python-3.10+-blue?style=for-the-badge&logo=python)
 ![Flask](https://img.shields.io/badge/Flask-2.x-black?style=for-the-badge&logo=flask)
