@@ -78,8 +78,8 @@ INDEX_HTML = r"""
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<!-- Make mobile truly responsive (handles iOS safe areas too) -->
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<!-- Strong mobile viewport: prevents auto-zooming and uses safe areas -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
 <title>T5 News Summarizer</title>
 
 <!-- Dark-only favicon & meta -->
@@ -114,10 +114,18 @@ INDEX_HTML = r"""
   }
 
   /* Use svh so mobile address bars don't shrink the layout */
-  .wrap{min-height:100svh; display:grid; place-items:center; padding:16px}
+  .wrap{
+    min-height:100svh;
+    display:flex;
+    justify-content:center;
+    align-items:flex-start;
+    padding:16px;
+  }
+
   .card{
     width:100%;
-    max-width:720px;                  /* desktop cap */
+    max-width:680px;                 /* desktop cap */
+    margin:auto;                      /* center on all screens */
     background:var(--card);
     border:1px solid var(--border);
     border-radius:20px;
