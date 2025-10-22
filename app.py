@@ -1,4 +1,4 @@
-# app.py — T5 News Summarizer (mobile-responsive, dark-only)
+# app.py — T5 News Summarizer (mobile-responsive, dark-only + improved action bar)
 import os, io, textwrap
 import torch
 from flask import Flask, request, jsonify, render_template_string, send_file
@@ -78,16 +78,11 @@ INDEX_HTML = r"""
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<!-- Strong mobile viewport: prevents auto-zooming and uses safe areas -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
 <title>T5 News Summarizer</title>
 
-<!-- Dark-only favicon & meta -->
 <link rel="icon" href="data:,">
 <meta name="theme-color" content="#0b0f17">
-<meta property="og:title" content="T5 News Summarizer" />
-<meta property="og:description" content="Summarize long articles with your fine-tuned T5. Copy, download, share; style presets; formal variant." />
-<meta name="twitter:card" content="summary" />
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
@@ -113,7 +108,6 @@ INDEX_HTML = r"""
       linear-gradient(180deg,var(--bg) 0%,var(--bg2) 100%);
   }
 
-  /* Use svh so mobile address bars don't shrink the layout */
   .wrap{
     min-height:100svh;
     display:flex;
@@ -124,14 +118,13 @@ INDEX_HTML = r"""
 
   .card{
     width:100%;
-    max-width:680px;                 /* desktop cap */
-    margin:auto;                      /* center on all screens */
+    max-width:680px;
+    margin:auto;
     background:var(--card);
     border:1px solid var(--border);
     border-radius:20px;
     backdrop-filter: blur(16px) saturate(140%);
     box-shadow:0 10px 40px rgba(0,0,0,.35);
-    overflow:visible;                 /* allow native select to render fully */
   }
 
   .header{
@@ -166,19 +159,49 @@ INDEX_HTML = r"""
     outline:none; border-color:var(--accent);
     box-shadow:0 0 0 4px rgba(92,240,208,.15);
   }
-  /* Dark dropdown options on Windows */
   select option{background:#101821; color:#e8eef9}
-
-  .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:space-between}
 
   .btn{
     appearance:none; border:1px solid transparent; cursor:pointer;
     padding:12px 16px; border-radius:14px; font-weight:700;
     background:linear-gradient(120deg, var(--accent), var(--accent-2)); color:#071218;
-    box-shadow:0 8px 20px rgba(110,168,255,.25), inset 0 0 0 1px rgba(255,255,255,.25);
+    box-shadow:0 8px 20px rgba(110,168,255,.25);
     transition:transform .08s ease, filter .2s ease;
   }
   .btn:hover{filter:brightness(1.05)} .btn:active{transform:translateY(1px)}
+
+  /* --- New Horizontal Action Bar --- */
+  .summary-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .action-bar {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+  .chip-btn {
+    cursor: pointer;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: #071218;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 8px 14px;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(110, 168, 255, 0.2);
+  }
+  .chip-btn:hover { transform: translateY(-1px); filter: brightness(1.1); }
+
+  @media (max-width: 480px) {
+    .action-bar { justify-content: center; gap: 6px; }
+    .chip-btn { flex: 1 1 auto; text-align: center; }
+  }
 
   .summary{
     white-space:pre-wrap;
@@ -186,26 +209,11 @@ INDEX_HTML = r"""
     border-radius:14px; padding:16px;
     font: 400 15px/1.65 Inter, system-ui, sans-serif;
   }
-
-  /* Formal card */
   .formal-card{
     background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
     border:1px solid var(--border); border-radius:16px;
     box-shadow:0 8px 24px rgba(0,0,0,.25);
     padding:16px 18px;
-  }
-  .formal-title{margin:0 0 10px; font-size:clamp(15px,4.2vw,16px); font-weight:700; color:#eaf2ff}
-  .formal-body{
-    white-space:pre-wrap; background:var(--panel); border:1px solid var(--border);
-    border-radius:12px; padding:14px 16px; line-height:1.65;
-  }
-
-  /* Mobile tweaks */
-  @media (max-width: 480px){
-    .header{padding:12px}
-    .content{padding:14px}
-    textarea{min-height:160px}
-    .row{flex-direction:column; align-items:stretch; gap:8px}
   }
 </style>
 </head>
@@ -244,13 +252,13 @@ INDEX_HTML = r"""
 
       {% if summary %}
       <div class="content">
-        <div class="row" style="justify-content:space-between; align-items:center">
+        <div class="summary-header">
           <div class="muted">Summary</div>
-          <div class="row" style="gap:8px; flex-wrap:wrap">
-            <button class="btn" style="padding:10px 12px" onclick="copyOut()">Copy</button>
-            <button class="btn" style="padding:10px 12px" onclick="downloadTxt()">.txt</button>
-            <button class="btn" style="padding:10px 12px" onclick="downloadPdf()">.pdf</button>
-            <button class="btn" style="padding:10px 12px" onclick="shareLink()">Share link</button>
+          <div class="action-bar">
+            <button class="chip-btn" onclick="copyOut()">📋 Copy</button>
+            <button class="chip-btn" onclick="downloadTxt()">💾 .txt</button>
+            <button class="chip-btn" onclick="downloadPdf()">📰 .pdf</button>
+            <button class="chip-btn" onclick="shareLink()">🔗 Share</button>
           </div>
         </div>
 
@@ -264,63 +272,38 @@ INDEX_HTML = r"""
       {% endif %}
     </div>
   </div>
-
 <script>
-  // background glow follows cursor (desktop)
-  document.addEventListener('mousemove',(e)=>{
-    const x=(e.clientX/window.innerWidth)*100+'%';
-    const y=(e.clientY/window.innerHeight)*100+'%';
-    document.body.style.setProperty('--mx',x);
-    document.body.style.setProperty('--my',y);
-  });
-
-  function startLoading(){
-    const b=document.getElementById('btnSubmit'), s=document.getElementById('spin');
-    b.disabled=true; s.style.display='inline';
-    // guard: re-enable in case server is fast
-    setTimeout(()=>{ b.disabled=false; s.style.display='none'; }, 1500);
-  }
-
-  function copyOut(){
-    const el=document.getElementById('out');
-    if(!el) return;
-    navigator.clipboard.writeText(el.innerText);
-  }
-
-  function downloadTxt(){
-    const el=document.getElementById('out'); if(!el) return;
-    const blob=new Blob([el.innerText],{type:'text/plain'});
-    const a=document.createElement('a');
-    a.href=URL.createObjectURL(blob); a.download='summary.txt'; a.click();
-  }
-
-  async function downloadPdf(){
-    const el=document.getElementById('out'); if(!el) return alert('No summary yet');
-    const t=el.innerText.trim(); if(!t) return alert('No summary yet');
-    const res=await fetch('/export/pdf',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:t})});
-    if(!res.ok){ alert('PDF export requires reportlab'); return; }
-    const blob=await res.blob();
-    const a=document.createElement('a');
-    a.href=URL.createObjectURL(blob); a.download='summary.pdf'; a.click();
-  }
-
-  function shareLink(){
-    const t=(document.getElementById('text')?.value||'').trim();
-    if(!t) return alert('Paste an article first');
-    const s=encodeURIComponent(btoa(unescape(encodeURIComponent(t))));
-    history.replaceState(null,'',location.pathname+'#q='+s);
-    alert('Shareable link added to the URL.');
-  }
-
-  // Load text from hash if present
-  (function(){
-    const m=location.hash.match(/#q=([^&]+)/);
-    if(m){
-      const txt=decodeURIComponent(escape(atob(decodeURIComponent(m[1]))));
-      const ta=document.getElementById('text');
-      if(ta) ta.value=txt;
-    }
-  })();
+function startLoading(){
+  const b=document.getElementById('btnSubmit'), s=document.getElementById('spin');
+  b.disabled=true; s.style.display='inline';
+  setTimeout(()=>{ b.disabled=false; s.style.display='none'; },1500);
+}
+function copyOut(){
+  const el=document.getElementById('out');
+  if(el) navigator.clipboard.writeText(el.innerText);
+}
+function downloadTxt(){
+  const el=document.getElementById('out'); if(!el) return;
+  const blob=new Blob([el.innerText],{type:'text/plain'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob); a.download='summary.txt'; a.click();
+}
+async function downloadPdf(){
+  const el=document.getElementById('out'); if(!el) return alert('No summary yet');
+  const t=el.innerText.trim(); if(!t) return alert('No summary yet');
+  const res=await fetch('/export/pdf',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:t})});
+  if(!res.ok){ alert('PDF export requires reportlab'); return; }
+  const blob=await res.blob();
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob); a.download='summary.pdf'; a.click();
+}
+function shareLink(){
+  const t=(document.getElementById('text')?.value||'').trim();
+  if(!t) return alert('Paste an article first');
+  const s=encodeURIComponent(btoa(unescape(encodeURIComponent(t))));
+  history.replaceState(null,'',location.pathname+'#q='+s);
+  alert('Shareable link added to the URL.');
+}
 </script>
 </body>
 </html>
@@ -329,21 +312,13 @@ INDEX_HTML = r"""
 @app.route("/", methods=["GET", "POST"])
 def index():
     style = request.form.get("style", "news")
-    text = ""
-    summary = ""
-    v_formal = ""
+    text, summary, v_formal = "", "", ""
     if request.method == "POST":
         text = (request.form.get("text") or "").strip()
         if text:
             summary = summarize(text, style)
             v_formal = rewrite_formal(summary)
-    return render_template_string(
-        INDEX_HTML,
-        text=text,
-        summary=summary,
-        style=style,
-        v_formal=v_formal,
-    )
+    return render_template_string(INDEX_HTML, text=text, summary=summary, style=style, v_formal=v_formal)
 
 
 @app.post("/export/pdf")
@@ -387,7 +362,6 @@ def api():
 @app.get("/health")
 def health():
     return {"ok": True}
-
 
 if __name__ == "__main__":
     app.run(host="127.0.0.1", port=int(os.getenv("PORT", 5000)), debug=True)
