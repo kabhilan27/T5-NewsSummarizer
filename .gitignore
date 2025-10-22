@@ -1,0 +1,78 @@
+# ===============================
+# 🐍 Python
+# ===============================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+*.egg
+*.spec
+
+# ===============================
+# 🧱 Virtual Environments
+# ===============================
+.venv/
+venv/
+env/
+ENV/
+pip-wheel-metadata/
+pyvenv.cfg
+
+# ===============================
+# 🧰 OS / IDE / Editor
+# ===============================
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# ===============================
+# 🧾 Logs / Caches / Outputs
+# ===============================
+*.log
+.cache/
+lightning_logs/
+checkpoints/
+__pycache__/
+*.tmp
+*.bak
+
+# ===============================
+# 🔒 Secrets & Config Files
+# ===============================
+.env
+*.key
+*.pem
+
+# ===============================
+# 📓 Jupyter / Colab
+# ===============================
+.ipynb_checkpoints/
+*.ipynb
+
+# ===============================
+# 🏗️ Build / Distribution
+# ===============================
+dist/
+build/
+site/
+*.tar.gz
+*.whl
+
+# ===============================
+# 🤖 Model Artifacts
+# ===============================
+# The exported model is tracked via Git LFS, so we keep it in repo.
+# If you prefer NOT to push model files, uncomment below:
+# exported_t5_news/
+
+# ===============================
+# 🧩 Misc
+# ===============================
+*.zip
+*.7z
+*.rar
+*.bak
+*.swp
