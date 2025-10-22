@@ -1,16 +1,17 @@
 # T5 News Summarizer (Flask)
 
+[![Live Demo – Hugging Face](https://img.shields.io/badge/Live_Demo-NewsAI%20on%20Hugging%20Face-blue?style=for-the-badge&logo=huggingface)](https://Kabhilan27-NewsAI.hf.space/)
 ![Python](https://img.shields.io/badge/Python-3.10+-blue?style=for-the-badge&logo=python)
 ![Flask](https://img.shields.io/badge/Flask-2.x-black?style=for-the-badge&logo=flask)
 ![PyTorch](https://img.shields.io/badge/PyTorch-EE4C2C?style=for-the-badge&logo=pytorch&logoColor=white)
-![Transformers](https://img.shields.io/badge/🤗_Transformers-FFCC00?style=for-the-badge)
+![Transformers](https://img.shields.io/badge/%F0%9F%A4%97_Transformers-FFCC00?style=for-the-badge)
 ![License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)
 ![Status](https://img.shields.io/badge/Build-Stable-success?style=for-the-badge)
 ![Stars](https://img.shields.io/github/stars/kabhilan27/T5-NewsSummarizer?style=for-the-badge&color=brightgreen)
 
 ---
 
-A modern, **dark-themed** Flask web app powered by a **fine-tuned T5 model** for **abstractive news summarization**.  
+A modern, **dark-themed Flask web app** powered by a **fine-tuned T5 model** for **abstractive news summarization**.  
 Paste long articles → get clear, concise summaries — with **style presets**, **export (.txt/.pdf)**, **copy/share**, and a **More Formal Rewrite**.
 
 ---
@@ -26,17 +27,28 @@ Paste long articles → get clear, concise summaries — with **style presets**,
   - 🗣️ Simple English
 
 ### ✨ Modern Web Interface
-- **Flask** + custom **HTML/CSS** (glassy, **dark-only** UI).
-- Responsive layout with soft gradients.
+- **Flask** + custom **HTML/CSS** (glassy, dark-only UI).
+- Responsive layout with smooth gradients.
 - One-click **Copy**, **Download (.txt/.pdf)**, **Share link**.
 
 ### 🧾 Post-Processing
 - **“More Formal Rewrite”** for a polished, professional tone (model-generated).
-- **PDF export** via ReportLab.
+- **PDF export** powered by ReportLab.
 
 ### ⚙️ Developer-Friendly
 - Model weights tracked with **Git LFS**.
-- Clean, extensible structure — ready for deployment or API use.
+- Clean, extensible structure — ready for deployment or API integration.
+
+---
+
+## 🌐 Deployment
+
+The app is live on **Hugging Face Spaces** using a Docker container setup.  
+➡️ **Try it here:** [https://Kabhilan27-NewsAI.hf.space/](https://Kabhilan27-NewsAI.hf.space/)
+
+- **Backend:** Flask served via Gunicorn  
+- **Model Host:** Local fine-tuned T5 (or optional Hugging Face Hub model via `MODEL_ID`)  
+- **Frontend:** Custom HTML/CSS with a glassmorphic dark theme  
 
 ---
 
@@ -46,7 +58,8 @@ T5-NewsSummarizer/
 │
 ├── app.py                   # Flask application (routes + UI)
 ├── requirements.txt         # Python dependencies
-├── .gitignore               # Git ignore rules (no .venv / .env)
+├── Dockerfile               # Deployment configuration (for Hugging Face)
+├── .gitignore               # Ignore .venv, .env, and model cache
 ├── .gitattributes           # Git LFS rules for model files
 ├── exported_t5_news/        # Fine-tuned T5 (save_pretrained format)
 │   ├── config.json
@@ -56,6 +69,7 @@ T5-NewsSummarizer/
 │   ├── tokenizer.json
 │   └── spiece.model
 └── README.md
+
 ```
 ## 🧠 Model Details
 
