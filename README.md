@@ -86,14 +86,9 @@ python -m venv .venv
 Activate the environment:
 
 🪟 Windows
-
-bash
-Copy code
 .\.venv\Scripts\activate
-🐧 macOS / Linux
 
-bash
-Copy code
+🐧 macOS / Linux
 source .venv/bin/activate
 ```
 
