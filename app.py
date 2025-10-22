@@ -1,4 +1,4 @@
-# app.py — T5 News Summarizer (mobile-responsive, dark-only + improved action bar)
+# app.py — T5 News Summarizer (mobile-responsive, centered summarize + clean buttons)
 import os, io, textwrap
 import torch
 from flask import Flask, request, jsonify, render_template_string, send_file
@@ -60,7 +60,6 @@ def summarize(src_text: str, style: str) -> str:
 
 
 def rewrite_formal(summary: str) -> str:
-    """Generate a more formal rewrite of the main summary."""
     return _generate(
         f"Rewrite this summary in a formal, neutral, and polished tone:\n{summary}",
         max_len=MAX_SUM_LEN,
@@ -78,14 +77,12 @@ INDEX_HTML = r"""
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>T5 News Summarizer</title>
-
 <link rel="icon" href="data:,">
 <meta name="theme-color" content="#0b0f17">
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
 <style>
   :root{
     --bg:#0b0f17; --bg2:#0a0d14;
@@ -95,211 +92,147 @@ INDEX_HTML = r"""
     --text:#e8eef9; --muted:#a7b0c0;
     --accent:#5cf0d0; --accent-2:#6ea8ff;
   }
-
-  *{box-sizing:border-box}
-  html,body{margin:0;padding:0}
+  *{box-sizing:border-box;margin:0;padding:0}
   body{
-    color:var(--text);
     font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
-    line-height:1.5;
     background:
       radial-gradient(1200px 800px at var(--mx,50%) var(--my,30%), rgba(92,240,208,.12), transparent 60%),
       radial-gradient(900px 600px at calc(100% - 10%) 10%, rgba(110,168,255,.10), transparent 60%),
       linear-gradient(180deg,var(--bg) 0%,var(--bg2) 100%);
+    color:var(--text); line-height:1.5;
   }
 
-  .wrap{
-    min-height:100svh;
-    display:flex;
-    justify-content:center;
-    align-items:flex-start;
-    padding:16px;
-  }
-
+  .wrap{min-height:100vh; display:flex; justify-content:center; align-items:flex-start; padding:16px}
   .card{
-    width:100%;
-    max-width:680px;
-    margin:auto;
+    width:100%; max-width:680px;
     background:var(--card);
     border:1px solid var(--border);
     border-radius:20px;
-    backdrop-filter: blur(16px) saturate(140%);
     box-shadow:0 10px 40px rgba(0,0,0,.35);
+    backdrop-filter: blur(16px) saturate(140%);
   }
 
-  .header{
-    padding:14px 16px;
-    display:flex; align-items:center; gap:12px;
-    border-bottom:1px solid var(--border);
-    background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
-  }
-  .brand{display:flex; gap:12px; align-items:center}
+  .header{padding:16px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:12px;}
   .logo{
-    width:36px; height:36px; border-radius:10px;
+    width:36px;height:36px;border-radius:10px;
     background:linear-gradient(135deg,var(--accent),var(--accent-2));
-    display:grid; place-items:center; color:#08121a; font-weight:800;
+    display:grid;place-items:center;font-weight:800;color:#08121a;
   }
-  h1{margin:0; font-size:clamp(18px,4.8vw,22px)}
-  .muted{color:var(--muted); font-size:clamp(12px,3.4vw,13px)}
 
-  .content{display:grid; gap:12px; padding:16px}
+  h1{font-size:20px;margin:0;}
+  .muted{color:var(--muted);font-size:13px}
 
-  label{font-weight:600; font-size:clamp(12px,3.4vw,14px)}
-  select, textarea{
-    width:100%;
-    background:var(--panel);
-    color:var(--text);
-    border:1px solid var(--border);
-    border-radius:14px;
-    padding:12px 14px;
-    font: 400 15px/1.5 Inter, system-ui, sans-serif;
+  .content{display:grid;gap:12px;padding:16px}
+
+  textarea, select{
+    width:100%;background:var(--panel);color:var(--text);
+    border:1px solid var(--border);border-radius:14px;padding:12px 14px;
   }
-  textarea{min-height:180px; resize:vertical}
-  select:focus, textarea:focus{
-    outline:none; border-color:var(--accent);
-    box-shadow:0 0 0 4px rgba(92,240,208,.15);
-  }
-  select option{background:#101821; color:#e8eef9}
+  textarea{min-height:180px;resize:vertical;}
+  textarea:focus, select:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 4px rgba(92,240,208,.15);}
+  select option{background:#101821;color:#e8eef9;}
 
   .btn{
-    appearance:none; border:1px solid transparent; cursor:pointer;
-    padding:12px 16px; border-radius:14px; font-weight:700;
-    background:linear-gradient(120deg, var(--accent), var(--accent-2)); color:#071218;
-    box-shadow:0 8px 20px rgba(110,168,255,.25);
-    transition:transform .08s ease, filter .2s ease;
+    background:linear-gradient(120deg,var(--accent),var(--accent-2));
+    color:#071218;border:none;border-radius:14px;padding:12px 20px;
+    font-weight:700;cursor:pointer;transition:0.2s ease;
   }
-  .btn:hover{filter:brightness(1.05)} .btn:active{transform:translateY(1px)}
+  .btn:hover{filter:brightness(1.05);} .btn:active{transform:translateY(1px);}
 
-  /* --- New Horizontal Action Bar --- */
-  .summary-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 10px;
-  }
-  .action-bar {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-  }
-  .chip-btn {
-    cursor: pointer;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    background: linear-gradient(135deg, var(--accent), var(--accent-2));
-    color: #071218;
-    font-weight: 600;
-    font-size: 14px;
-    padding: 8px 14px;
-    transition: all 0.2s ease;
-    box-shadow: 0 4px 12px rgba(110, 168, 255, 0.2);
-  }
-  .chip-btn:hover { transform: translateY(-1px); filter: brightness(1.1); }
+  .center-row{display:flex;justify-content:center;align-items:center;margin-top:10px;}
 
-  @media (max-width: 480px) {
-    .action-bar { justify-content: center; gap: 6px; }
-    .chip-btn { flex: 1 1 auto; text-align: center; }
+  /* Horizontal button bar */
+  .summary-header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;}
+  .action-bar{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:8px;}
+  .chip-btn{
+    border:1px solid var(--border);border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent-2));
+    color:#071218;font-weight:600;padding:8px 14px;cursor:pointer;
+    transition:all 0.2s ease;box-shadow:0 4px 12px rgba(110,168,255,0.2);
   }
-
+  .chip-btn:hover{transform:translateY(-1px);filter:brightness(1.1);}
   .summary{
-    white-space:pre-wrap;
-    background:var(--panel); border:1px solid var(--border);
-    border-radius:14px; padding:16px;
-    font: 400 15px/1.65 Inter, system-ui, sans-serif;
+    white-space:pre-wrap;background:var(--panel);border:1px solid var(--border);
+    border-radius:14px;padding:16px;margin-top:12px;
   }
-  .formal-card{
-    background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
-    border:1px solid var(--border); border-radius:16px;
-    box-shadow:0 8px 24px rgba(0,0,0,.25);
-    padding:16px 18px;
-  }
+
+  .formal-card{background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02));
+    border:1px solid var(--border);border-radius:16px;padding:16px 18px;margin-top:16px;}
 </style>
 </head>
+
 <body>
-  <div class="wrap">
-    <div class="card">
-      <div class="header">
-        <div class="brand">
-          <div class="logo">T5</div>
-          <div>
-            <h1>T5 News Summarizer</h1>
-            <div class="muted">Copy / Download / Share · Style presets · Formal variant</div>
-          </div>
-        </div>
+<div class="wrap">
+  <div class="card">
+    <div class="header">
+      <div class="logo">T5</div>
+      <div>
+        <h1>T5 News Summarizer</h1>
+        <div class="muted">Copy / Download / Share · Style presets · Formal variant</div>
       </div>
-
-      <form class="content" method="post" onsubmit="startLoading()">
-        <label class="muted">Topic / Style</label>
-        <select name="style">
-          <option value="news" {% if style=='news' %}selected{% endif %}>News (default)</option>
-          <option value="academic" {% if style=='academic' %}selected{% endif %}>Academic</option>
-          <option value="marketing" {% if style=='marketing' %}selected{% endif %}>Marketing</option>
-          <option value="simple-english" {% if style=='simple-english' %}selected{% endif %}>Simple English</option>
-        </select>
-
-        <label class="muted" for="text">Paste article here…</label>
-        <textarea id="text" name="text" placeholder="Paste article here..." required>{{text}}</textarea>
-
-        <div class="row">
-          <span class="muted">Tip: Longer inputs may take a few seconds.</span>
-          <button class="btn" id="btnSubmit" type="submit">
-            Summarize <span id="spin" style="display:none">⏳</span>
-          </button>
-        </div>
-      </form>
-
-      {% if summary %}
-      <div class="content">
-        <div class="summary-header">
-          <div class="muted">Summary</div>
-          <div class="action-bar">
-            <button class="chip-btn" onclick="copyOut()">📋 Copy</button>
-            <button class="chip-btn" onclick="downloadTxt()">💾 .txt</button>
-            <button class="chip-btn" onclick="downloadPdf()">📰 .pdf</button>
-            <button class="chip-btn" onclick="shareLink()">🔗 Share</button>
-          </div>
-        </div>
-
-        <div id="out" class="summary">{{summary}}</div>
-
-        <div class="formal-card">
-          <h3 class="formal-title">More formal rewrite</h3>
-          <div class="formal-body" id="v_formal">{{v_formal}}</div>
-        </div>
-      </div>
-      {% endif %}
     </div>
+
+    <form class="content" method="post" onsubmit="startLoading()">
+      <label class="muted">Topic / Style</label>
+      <select name="style">
+        <option value="news" {% if style=='news' %}selected{% endif %}>News (default)</option>
+        <option value="academic" {% if style=='academic' %}selected{% endif %}>Academic</option>
+        <option value="marketing" {% if style=='marketing' %}selected{% endif %}>Marketing</option>
+        <option value="simple-english" {% if style=='simple-english' %}selected{% endif %}>Simple English</option>
+      </select>
+
+      <label class="muted" for="text">Paste article here…</label>
+      <textarea id="text" name="text" placeholder="Paste article here..." required>{{text}}</textarea>
+
+      <div class="center-row">
+        <button class="btn" id="btnSubmit" type="submit">Summarize</button>
+      </div>
+    </form>
+
+    {% if summary %}
+    <div class="content">
+      <div class="summary-header">
+        <div class="muted">Summary</div>
+        <div class="action-bar">
+          <button class="chip-btn" onclick="copyOut()">Copy</button>
+          <button class="chip-btn" onclick="downloadTxt()">.txt</button>
+          <button class="chip-btn" onclick="downloadPdf()">.pdf</button>
+          <button class="chip-btn" onclick="shareLink()">Share</button>
+        </div>
+      </div>
+      <div id="out" class="summary">{{summary}}</div>
+      <div class="formal-card">
+        <h3 class="muted">More formal rewrite</h3>
+        <div id="v_formal" class="summary">{{v_formal}}</div>
+      </div>
+    </div>
+    {% endif %}
   </div>
+</div>
+
 <script>
 function startLoading(){
-  const b=document.getElementById('btnSubmit'), s=document.getElementById('spin');
-  b.disabled=true; s.style.display='inline';
-  setTimeout(()=>{ b.disabled=false; s.style.display='none'; },1500);
+  const b=document.getElementById('btnSubmit');
+  b.disabled=true;setTimeout(()=>b.disabled=false,1500);
 }
 function copyOut(){
-  const el=document.getElementById('out');
-  if(el) navigator.clipboard.writeText(el.innerText);
+  const el=document.getElementById('out');if(el)navigator.clipboard.writeText(el.innerText);
 }
 function downloadTxt(){
-  const el=document.getElementById('out'); if(!el) return;
+  const el=document.getElementById('out');if(!el)return;
   const blob=new Blob([el.innerText],{type:'text/plain'});
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob); a.download='summary.txt'; a.click();
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='summary.txt';a.click();
 }
 async function downloadPdf(){
-  const el=document.getElementById('out'); if(!el) return alert('No summary yet');
-  const t=el.innerText.trim(); if(!t) return alert('No summary yet');
+  const el=document.getElementById('out');if(!el)return alert('No summary yet');
+  const t=el.innerText.trim();if(!t)return alert('No summary yet');
   const res=await fetch('/export/pdf',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:t})});
-  if(!res.ok){ alert('PDF export requires reportlab'); return; }
-  const blob=await res.blob();
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob); a.download='summary.pdf'; a.click();
+  if(!res.ok){alert('PDF export requires reportlab');return;}
+  const blob=await res.blob();const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);a.download='summary.pdf';a.click();
 }
 function shareLink(){
   const t=(document.getElementById('text')?.value||'').trim();
-  if(!t) return alert('Paste an article first');
+  if(!t)return alert('Paste an article first');
   const s=encodeURIComponent(btoa(unescape(encodeURIComponent(t))));
   history.replaceState(null,'',location.pathname+'#q='+s);
   alert('Shareable link added to the URL.');
@@ -346,18 +279,6 @@ def export_pdf():
         c.drawString(72, y, line); y -= 14
     c.showPage(); c.save(); buffer.seek(0)
     return send_file(buffer, mimetype="application/pdf", as_attachment=True, download_name="summary.pdf")
-
-
-@app.post("/api")
-def api():
-    data = request.get_json(force=True, silent=True) or {}
-    text = (data.get("text") or "").strip()
-    style = data.get("style", "news")
-    if not text:
-        return jsonify(error="Missing 'text' field"), 400
-    s = summarize(text, style)
-    v = rewrite_formal(s)
-    return jsonify(summary=s, formal=v)
 
 @app.get("/health")
 def health():
