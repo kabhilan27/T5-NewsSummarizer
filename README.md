@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # T5 News Summarizer (Flask)
 
 [![Live Demo – Hugging Face](https://img.shields.io/badge/Live_Demo-NewsAI%20on%20Hugging%20Face-blue?style=for-the-badge&logo=huggingface)](https://Kabhilan27-NewsAI.hf.space/)
@@ -164,16 +163,3 @@ http://127.0.0.1:5000
 
 If you find this project useful, please ⭐ **star the repository** and share it!  
 Pull requests for **UI improvements**, **new features**, or **deployment recipes** are always welcome.
-=======
----
-title: "News Summarizer"
-emoji: 📰
-colorFrom: blue
-colorTo: purple
-sdk: docker
-app_file: app.py
-pinned: false
----
-
-A Flask-based T5 news summarizer that generates concise, faithful summaries.
->>>>>>> 820c6b9 (Add Space config to README)
