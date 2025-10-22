@@ -61,7 +61,7 @@ T5-NewsSummarizer/
 
 **Architecture:** `T5ForConditionalGeneration`  
 - **Base Model:** `t5-base`  
-- **Dataset:** *News Summary Dataset*  
+- **Dataset:** *News Summary Dataset* (Kaggle) 
 - **Key Libraries:** 🤗 Transformers, PyTorch (Lightning for training), Pandas, NumPy  
 
 ---
