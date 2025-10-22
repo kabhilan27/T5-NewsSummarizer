@@ -347,6 +347,10 @@ def api():
     v = rewrite_formal(s)
     return jsonify(summary=s, formal=v)
 
+@app.get("/health")
+def health():
+    return {"ok": True}
+
 
 if __name__ == "__main__":
     app.run(host="127.0.0.1", port=int(os.getenv("PORT", 5000)), debug=True)

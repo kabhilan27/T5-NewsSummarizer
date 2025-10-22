@@ -7,3 +7,4 @@ pdfminer.six
 pandas
 reportlab
 requests
+gunicorn
